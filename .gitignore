@@ -45,3 +45,5 @@ dist/
 /debug
 /weights
 eval.sh
+datasets/test.tar
+.DS_Store
