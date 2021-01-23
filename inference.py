@@ -11,8 +11,8 @@ from tqdm import tqdm
 from centermask.config import get_cfg
 
 INPUT_TEST_DATA_PATH = 'datasets/publaynet/test'
-TEST_AMMOUNT = 2
-# THRESH_TEST = 0.7
+TEST_AMMOUNT = 5
+THRESH_TEST = 0.5
 WEIGHT_PATH = 'output/PubLayNet-CenterMask-Lite-V-19-ms-4x/model_0016999.pth'
 CONFIG_FILE_PATH = 'output/PubLayNet-CenterMask-Lite-V-19-ms-4x/config.yaml'
 OUTPUT_TEST_RESULT_PATH = os.path.join(os.path.dirname(WEIGHT_PATH), 'test_inference_results')
@@ -32,7 +32,10 @@ def setup(args):
     cfg.merge_from_file(CONFIG_FILE_PATH)
     cfg.merge_from_list(args.opts)
     cfg.MODEL.WEIGHTS = WEIGHT_PATH
-    # cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = THRESH_TEST
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = THRESH_TEST
+    cfg.MODEL.RETINANET.SCORE_THRESH_TEST = THRESH_TEST
+    cfg.MODEL.PANOPTIC_FPN.COMBINE.INSTANCES_CONFIDENCE_THRESH = THRESH_TEST
+    cfg.MODEL.FCOS.INFERENCE_TH_TEST = THRESH_TEST
     cfg.MODEL.DEVICE = 'cpu'
     cfg.freeze()
     default_setup(cfg, args)
@@ -51,13 +54,14 @@ def main(args):
     for sample in tqdm(all_samples):
         image = cv2.imread(sample)
         outputs = predictor(image)
+        outputs = outputs["instances"].to("cpu")
         viz = Visualizer(
             image[:, :, ::-1],
             metadata=publaynet_metadata,
             scale=1,
             instance_mode=ColorMode.IMAGE_BW,  # remove the colors of unsegmented pixels
         )
-        viz = viz.draw_instance_predictions(outputs["instances"].to("cpu"))
+        viz = viz.draw_instance_predictions(outputs)
         visualized_image = viz.get_image()[:, :, ::-1]
         image_path = os.path.join(OUTPUT_TEST_RESULT_PATH, os.path.basename(sample))
         cv2.imwrite(image_path, visualized_image)
