@@ -117,6 +117,20 @@ def setup(args):
 
 
 def main(args):
+    # Regist own dataset.
+    from detectron2.data.datasets import register_coco_instances
+    # train data
+    name        = "publaynet_train"
+    json_file   = "/home/techainer/linus/publaynet/train.json"
+    image_root  = "/home/techainer/linus/publaynet/train/"
+    # test data
+    name_val        = "publaynet_val"
+    json_file_val   = "/home/techainer/linus/publaynet/val.json"
+    image_root_val  = "/home/techainer/linus/publaynet/val"
+    # registr
+    register_coco_instances(name, {}, json_file, image_root)
+    register_coco_instances(name_val, {}, json_file_val, image_root_val)
+
     cfg = setup(args)
 
     if args.eval_only:
@@ -145,6 +159,9 @@ def main(args):
 
 
 if __name__ == "__main__":
+    from clearml import Task
+    task = Task.init(project_name='CV Chain', task_name='publaynet_centermask_lite_V_19_eSE_FPN_ms_4x')
+
     args = default_argument_parser().parse_args()
     print("Command Line Args:", args)
     launch(

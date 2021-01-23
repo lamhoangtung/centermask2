@@ -1,0 +1,9 @@
+_BASE_: "Base-PubLayNet-CenterMask-Lite-VoVNet.yaml"
+MODEL:
+  WEIGHTS: "https://www.dropbox.com/s/rptgw6stppbiw1u/vovnet19_ese_detectron2.pth?dl=1"
+  VOVNET:
+    CONV_BODY : "V-19-eSE"
+SOLVER:
+  STEPS: (0, 500000)
+  MAX_ITER: 500000
+OUTPUT_DIR: "output/publaynet_centermask/PubLayNet-CenterMask-Lite-V-19-ms-4x"
